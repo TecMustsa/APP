@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Note App by M.D.</title>
+<style>
+  /* Reset & base */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin:0; padding:0;
+    background: #121212;
+    color: #eee;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+  }
+
+  h1 {
+    margin-bottom: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  /* Glass container */
+  .container {
+    background: rgba(255 255 255 / 0.05);
+    border-radius: 16px;
+    box-shadow:
+      0 8px 32px 0 rgba(255 255 255 / 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255 255 255 / 0.15);
+    width: 100%;
+    max-width: 900px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Form */
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #bbb;
+  }
+  input[type=text], input[type=date], textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: none;
+    background: rgba(255 255 255 / 0.1);
+    color: #eee;
+    font-size: 1rem;
+    resize: vertical;
+    transition: background 0.3s;
+  }
+  input[type=text]:focus, input[type=date]:focus, textarea:focus {
+    outline: none;
+    background: rgba(255 255 255 / 0.15);
+  }
+  textarea {
+    min-height: 100px;
+  }
+  input[type=file] {
+    margin-top: 6px;
+    color: #eee;
+  }
+
+  /* Buttons */
+  .btn {
+    margin-top: 12px;
+    background: #222;
+    border: 1.5px solid #444;
+    color: #eee;
+    padding: 12px 20px;
+    border-radius: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1rem;
+    user-select: none;
+    transition: background 0.25s, border-color 0.25s;
+  }
+  .btn:hover {
+    background: #333;
+    border-color: #888;
+  }
+  .btn:active {
+    background: #111;
+  }
+
+  /* Search bar */
+  #search-title {
+    margin-bottom: 20px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: none;
+    background: rgba(255 255 255 / 0.1);
+    color: #eee;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 400px;
+    transition: background 0.3s;
+  }
+  #search-title:focus {
+    outline: none;
+    background: rgba(255 255 255 / 0.15);
+  }
+
+  /* Note list */
+  #notes-list {
+    margin-top: 20px;
+    list-style: none;
+    padding: 0;
+    max-height: 400px;
+    overflow-y: auto;
+    border-radius: 16px;
+    border: 1px solid rgba(255 255 255 / 0.1);
+    background: rgba(255 255 255 / 0.03);
+  }
+  #notes-list li {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255 255 255 / 0.08);
+    display: flex;
+    flex-direction: column;
+    cursor: default;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  #notes-list li:hover {
+    background: rgba(255 255 255 / 0.1);
+  }
+  #notes-list li:last-child {
+    border-bottom: none;
+  }
+  .note-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #ddd;
+    margin-bottom: 4px;
+  }
+  .note-date {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 8px;
+  }
+  .note-text {
+    white-space: pre-wrap;
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+  .note-files {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .note-file-thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: border-color 0.3s;
+    position: relative;
+    background: #222;
+  }
+  .note-file-thumb:hover {
+    border-color: #777;
+  }
+  .note-file-thumb img, 
+  .note-file-thumb embed {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .note-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+  }
+  .note-actions button {
+    background: transparent;
+    border: none;
+    color: #bbb;
+    font-size: 1.3rem;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.3s;
+  }
+  .note-actions button:hover {
+    color: #eee;
+  }
+
+  /* Scrollbar minimal */
+  #notes-list::-webkit-scrollbar {
+    width: 8px;
+  }
+  #notes-list::-webkit-scrollbar-thumb {
+    background: rgba(255 255 255 / 0.2);
+    border-radius: 10px;
+  }
+  #notes-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Popup overlay for add/edit note */
+  .popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(18,18,18,0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .popup-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .popup {
+    background: rgba(255 255 255 / 0.07);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    padding: 25px 30px;
+    box-shadow:
+      0 10px 30px rgba(0,0,0,0.5);
+    color: #eee;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    user-select: auto;
+  }
+  .popup h2 {
+    margin: 0 0 15px;
+    font-weight: 700;
+    font-size: 1.4rem;
+  }
+  .popup label {
+    margin-top: 12px;
+    margin-bottom: 6px;
+  }
+  .popup input[type=text], .popup input[type=date], .popup textarea {
+    font-size: 1rem;
+  }
+  .popup textarea {
+    min-height: 90px;
+  }
+  .popup input[type=file] {
+    margin-top: 10px;
+    color: #eee;
+  }
+  .popup-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+  }
+  .popup .btn {
+    padding: 10px 18px;
+    font-weight: 600;
+    border-radius: 14px;
+  }
+  .popup .btn.cancel {
+    background: transparent;
+    border: 1.5px solid #666;
+    color: #bbb;
+  }
+  .popup .btn.cancel:hover {
+    background: transparent;
+    color: #eee;
+    border-color: #999;
+  }
+  .popup .btn.save {
+    background: #2e2e2e;
+    border: 1.5px solid #555;
+    color: #eee;
+  }
+  .popup .btn.save:hover {
+    background: #444;
+    border-color: #888;
+  }
+  .popup-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 1.8rem;
+    color: #bbb;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.25s;
+  }
+  .popup-close:hover {
+    color: #eee;
+  }
+
+  /* Popup file preview */
+  #filePreviewPopup {
+    position: fixed;
+    inset: 0;
+    background: rgba(18,18,18,0.9);
+    backdrop-filter: blur(6px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  #filePreviewPopup.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+  #filePreviewContent {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    background: #222;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  #filePreviewContent img,
+  #filePreviewContent embed {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 20px;
+  }
+  #filePreviewClose {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 2rem;
+    color: #ccc;
+    cursor: pointer;
+    user-select: none;
+    z-index: 2;
+    padding: 0 6px 6px 6px;
+    transition: color 0.3s;
+  }
+  #filePreviewClose:hover {
+    color: #eee;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .container {
+      padding: 15px 15px 25px;
+    }
+    #notes-list {
+      max-height: 300px;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <h1>Note App by M.D.</h1>
+  <div class="container">
+
+    <!-- Search -->
+    <input type="text" id="search-title" placeholder="Cerca note per titolo..." autocomplete="off" />
+
+    <!-- Note List -->
+    <ul id="notes-list" aria-label="Lista note">
+      <li>Nessuna nota presente.</li>
+    </ul>
+
+    <!-- Pulsante aggiungi nota -->
+    <button class="btn" id="btn-add-note" aria-label="Aggiungi nuova nota">➕ Aggiungi Nota</button>
+
+    <!-- Export / Import -->
+    <div style="margin-top: 30px; display: flex; gap: 15px; flex-wrap: wrap;">
+      <button class="btn" id="export-json-btn">Esporta JSON</button>
+      <button class="btn" id="import-json-btn">Importa JSON</button>
+      <button class="btn" id="export-pdf-btn">Esporta PDF</button>
+    </div>
+
+  </div>
+
+  <!-- Popup Add/Edit Note -->
+  <div class="popup-overlay" id="notePopupOverlay" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="popup" role="document" aria-labelledby="popupTitle">
+      <span class="popup-close" id="popupCloseBtn" aria-label="Chiudi popup">&times;</span>
+      <h2 id="popupTitle">Nuova Nota</h2>
+
+      <label for="note-title">Titolo</label>
+      <input type="text" id="note-title" autocomplete="off" placeholder="Inserisci titolo..." />
+
+      <label for="note-text">Descrizione</label>
+      <textarea id="note-text" placeholder="Scrivi la nota..."></textarea>
+
+      <label for="note-date">Data (opzionale)</label>
+      <input type="date" id="note-date" />
+
+      <label for="note-files">Allega file (png, jpg, jpeg, pdf) - opzionale</label>
+      <input type="file" id="note-files" accept=".png,.jpg,.jpeg,.pdf" multiple />
+
+      <div class="popup-buttons">
+        <button class="btn cancel" id="popupCancelBtn">Annulla</button>
+        <button class="btn save" id="popupSaveBtn">Salva</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup File Preview -->
+  <div id="filePreviewPopup" aria-hidden="true" role="dialog" aria-modal="true">
+    <div id="filePreviewContent" tabindex="0"></div>
+    <span id="filePreviewClose" aria-label="Chiudi anteprima file">&times;</span>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  (() => {
+    "use strict";
+
+    // DOM Elements
+    const notesList = document.getElementById('notes-list');
+    const searchInput = document.getElementById('search-title');
+    const btnAddNote = document.getElementById('btn-add-note');
+
+    const notePopupOverlay = document.getElementById('notePopupOverlay');
+    const popupCloseBtn = document.getElementById('popupCloseBtn');
+    const popupCancelBtn = document.getElementById('popupCancelBtn');
+    const popupSaveBtn = document.getElementById('popupSaveBtn');
+
+    const inputTitle = document.getElementById('note-title');
+    const inputText = document.getElementById('note-text');
+    const inputDate = document.getElementById('note-date');
+    const inputFiles = document.getElementById('note-files');
+
+    const exportJsonBtn = document.getElementById('export-json-btn');
+    const importJsonBtn = document.getElementById('import-json-btn');
+    const exportPdfBtn = document.getElementById('export-pdf-btn');
+
+    const filePreviewPopup = document.getElementById('filePreviewPopup');
+    const filePreviewContent = document.getElementById('filePreviewContent');
+    const filePreviewCloseBtn = document.getElementById('filePreviewClose');
+
+    // Data storage
+    let notes = [];
+    let editNoteId = null; // null when adding new note
+
+    // Load from localStorage
+    function loadNotes() {
+      const stored = localStorage.getItem('noteAppData');
+      if (stored) {
+        try {
+          notes = JSON.parse(stored);
+          // Validate files: sometimes old data might be corrupted
+          notes.forEach(note => {
+            if(!Array.isArray(note.files)) note.files = [];
+          });
+        } catch {
+          notes = [];
+        }
+      }
+    }
+
+    // Save to localStorage
+    function saveNotes() {
+      localStorage.setItem('noteAppData', JSON.stringify(notes));
+    }
+
+    // Format date (YYYY-MM-DD) to display locale
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      if (isNaN(d)) return '';
+      return d.toLocaleDateString(undefined, {year:'numeric', month:'short', day:'numeric'});
+    }
+
+    // Render notes list filtered by search
+    function renderNotes(filter = '') {
+      notesList.innerHTML = '';
+      const filtered = notes.filter(n => n.title.toLowerCase().includes(filter.toLowerCase()));
+      if (filtered.length === 0) {
+        notesList.innerHTML = '<li>Nessuna nota trovata.</li>';
+        return;
+      }
+      filtered.forEach(note => {
+        const li = document.createElement('li');
+        li.setAttribute('tabindex', '0');
+        // Title
+        const title = document.createElement('div');
+        title.className = 'note-title';
+        title.textContent = note.title || '(Senza titolo)';
+        li.appendChild(title);
+        // Date
+        if (note.date) {
+          const date = document.createElement('div');
+          date.className = 'note-date';
+          date.textContent = formatDate(note.date);
+          li.appendChild(date);
+        }
+        // Text
+        const text = document.createElement('div');
+        text.className = 'note-text';
+        text.textContent = note.text;
+        li.appendChild(text);
+
+        // Files thumbnails
+        if (note.files && note.files.length > 0) {
+          const filesDiv = document.createElement('div');
+          filesDiv.className = 'note-files';
+          note.files.forEach((file, idx) => {
+            const thumb = document.createElement('div');
+            thumb.className = 'note-file-thumb';
+            thumb.setAttribute('title', file.name);
+            thumb.setAttribute('tabindex', '0');
+
+            if (file.type.startsWith('image/')) {
+              const img = document.createElement('img');
+              img.src = file.data;
+              img.alt = file.name;
+              thumb.appendChild(img);
+            } else if (file.type === 'application/pdf') {
+              const pdfIcon = document.createElement('img');
+              pdfIcon.src = 'data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjZWVlIiB2aWV3Qm94PSIwIDAgNjQgNjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTQ4IDJoLTMydi0uMDI0Yy0xLjExMyAwLTIuMDI0Ljg5LTItMiAwIC45Ljg5IDEuOTkgMiAxLjgzNkwzMiA4YzMuMyAwIDYgMi42NyA2IDYiLz48L3N2Zz4='; // icon base64 pdf placeholder - puoi sostituire se vuoi
+              pdfIcon.alt = 'PDF';
+              pdfIcon.style.width = '100%';
+              pdfIcon.style.height = '100%';
+              pdfIcon.style.objectFit = 'contain';
+              thumb.appendChild(pdfIcon);
+            } else {
+              thumb.textContent = file.name;
+            }
+
+            // Click to open preview
+            thumb.addEventListener('click', () => {
+              openFilePreview(file);
+            });
+            thumb.addEventListener('keypress', (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openFilePreview(file);
+              }
+            });
+
+            filesDiv.appendChild(thumb);
+          });
+          li.appendChild(filesDiv);
+        }
+
+        // Actions edit / delete
+        const actions = document.createElement('div');
+        actions.className = 'note-actions';
+
+        // Edit button
+        const btnEdit = document.createElement('button');
+        btnEdit.innerHTML = '✏️';
+        btnEdit.title = 'Modifica nota';
+        btnEdit.addEventListener('click', () => openEditPopup(note.id));
+        actions.appendChild(btnEdit);
+
+        // Delete button
+        const btnDel = document.createElement('button');
+        btnDel.innerHTML = '🗑️';
+        btnDel.title = 'Elimina nota';
+        btnDel.addEventListener('click', () => {
+          if(confirm('Sei sicuro di voler eliminare questa nota?')) {
+            deleteNote(note.id);
+          }
+        });
+        actions.appendChild(btnDel);
+
+        li.appendChild(actions);
+
+        notesList.appendChild(li);
+      });
+    }
+
+    // Generate unique id
+    function generateId() {
+      return '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    // Open popup for new note
+    function openAddPopup() {
+      editNoteId = null;
+      inputTitle.value = '';
+      inputText.value = '';
+      inputDate.value = '';
+      inputFiles.value = '';
+      notePopupOverlay.querySelector('#popupTitle').textContent = 'Nuova Nota';
+      notePopupOverlay.setAttribute('aria-hidden', 'false');
+      notePopupOverlay.classList.add('active');
+      inputTitle.focus();
+    }
+
+    // Open popup for edit note
+    function openEditPopup(id) {
+      editNoteId = id;
+      const note = notes.find(n => n.id === id);
+      if (!note) return;
+      inputTitle.value = note.title || '';
+      inputText.value = note.text || '';
+      inputDate.value = note.date || '';
+      inputFiles.value = '';
+      notePopupOverlay.querySelector('#popupTitle').textContent = 'Modifica Nota';
+      notePopupOverlay.setAttribute('aria-hidden', 'false');
+      notePopupOverlay.classList.add('active');
+      inputTitle.focus();
+    }
+
+    // Close popup
+    function closePopup() {
+      notePopupOverlay.classList.remove('active');
+      notePopupOverlay.setAttribute('aria-hidden', 'true');
+      inputFiles.value = '';
+      editNoteId = null;
+    }
+
+    // Delete note by id
+    function deleteNote(id) {
+      notes = notes.filter(n => n.id !== id);
+      saveNotes();
+      renderNotes(searchInput.value);
+    }
+
+    // Add or update note on save
+    async function saveNote() {
+      const title = inputTitle.value.trim();
+      const text = inputText.value.trim();
+      const date = inputDate.value || '';
+
+      if (!text && !title) {
+        alert('Inserisci almeno un titolo o una descrizione.');
+        return;
+      }
+
+      // Read files and convert to base64
+      const filesArray = [];
+      if (inputFiles.files.length > 0) {
+        for (const file of inputFiles.files) {
+          if (!['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'].includes(file.type)) {
+            alert('File non supportato: ' + file.name);
+            return;
+          }
+          const base64 = await fileToBase64(file);
+          filesArray.push({
+            name: file.name,
+            type: file.type,
+            data: base64
+          });
+        }
+      }
+
+      if (editNoteId) {
+        // Update note
+        const idx = notes.findIndex(n => n.id === editNoteId);
+        if (idx === -1) {
+          alert('Nota non trovata.');
+          closePopup();
+          return;
+        }
+        // Append new files to existing ones
+        const existingFiles = notes[idx].files || [];
+        notes[idx] = {
+          ...notes[idx],
+          title,
+          text,
+          date,
+          files: existingFiles.concat(filesArray)
+        };
+      } else {
+        // Add new note
+        notes.push({
+          id: generateId(),
+          title,
+          text,
+          date,
+          files: filesArray
+        });
+      }
+      saveNotes();
+      renderNotes(searchInput.value);
+      closePopup();
+    }
+
+    // Convert file to base64 string
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = e => reject(e);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Search input handler
+    searchInput.addEventListener('input', () => {
+      renderNotes(searchInput.value);
+    });
+
+    // Open add note popup
+    btnAddNote.addEventListener('click', openAddPopup);
+
+    // Close popup buttons
+    popupCloseBtn.addEventListener('click', closePopup);
+    popupCancelBtn.addEventListener('click', closePopup);
+
+    // Save note button
+    popupSaveBtn.addEventListener('click', saveNote);
+
+    // Close popup on Escape
+    window.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        if (notePopupOverlay.classList.contains('active')) closePopup();
+        if (filePreviewPopup.classList.contains('active')) closeFilePreview();
+      }
+    });
+
+    // Render all notes initially
+    loadNotes();
+    renderNotes();
+
+    // Export notes JSON
+    exportJsonBtn.addEventListener('click', () => {
+      if (notes.length === 0) {
+        alert('Non ci sono note da esportare.');
+        return;
+      }
+      const dataStr = JSON.stringify(notes, null, 2);
+      const blob = new Blob([dataStr], {type: "application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'note_export.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Import notes JSON
+    importJsonBtn.addEventListener('click', () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json,application/json';
+      input.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+          try {
+            const importedNotes = JSON.parse(e.target.result);
+            if (!Array.isArray(importedNotes)) throw new Error();
+            // Merge imported notes, avoid duplicates by id
+            importedNotes.forEach(impNote => {
+              if (!impNote.id) impNote.id = generateId();
+              if (!notes.find(n => n.id === impNote.id)) notes.push(impNote);
+            });
+            saveNotes();
+            renderNotes(searchInput.value);
+            alert('Importazione completata.');
+          } catch {
+            alert('File JSON non valido.');
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    });
+
+    // Export PDF (using jsPDF)
+    exportPdfBtn.addEventListener('click', () => {
+      if (notes.length === 0) {
+        alert('Non ci sono note da esportare.');
+        return;
+      }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      let y = 10;
+      const pageHeight = doc.internal.pageSize.height;
+
+      notes.forEach((note, i) => {
+        const title = note.title || '(Senza titolo)';
+        const dateStr = note.date ? formatDate(note.date) : '';
+        const text = note.text || '';
+
+        doc.setFontSize(16);
+        doc.setTextColor(40);
+        doc.text(title, 10, y);
+        y += 8;
+
+        if (dateStr) {
+          doc.setFontSize(10);
+          doc.setTextColor(100);
+          doc.text(dateStr, 10, y);
+          y += 6;
+        }
+
+        doc.setFontSize(12);
+        doc.setTextColor(50);
+        const splitText = doc.splitTextToSize(text, 180);
+        doc.text(splitText, 10, y);
+        y += splitText.length * 7 + 10;
+
+        if (y > pageHeight - 30 && i !== notes.length - 1) {
+          doc.addPage();
+          y = 10;
+        }
+      });
+
+      doc.save('note_export.pdf');
+    });
+
+    // File Preview Popup
+
+    // Apri popup con preview file
+    function openFilePreview(file) {
+      filePreviewContent.innerHTML = '';
+      if (file.type.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.src = file.data;
+        img.alt = file.name;
+        filePreviewContent.appendChild(img);
+      } else if (file.type === 'application/pdf') {
+        const embed = document.createElement('embed');
+        embed.src = file.data;
+        embed.type = 'application/pdf';
+        embed.style.width = '100%';
+        embed.style.height = '500px';
+        filePreviewContent.appendChild(embed);
+      } else {
+        filePreviewContent.textContent = 'Anteprima non disponibile.';
+      }
+      filePreviewPopup.classList.add('active');
+      filePreviewPopup.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeFilePreview() {
+      filePreviewPopup.classList.remove('active');
+      filePreviewPopup.setAttribute('aria-hidden', 'true');
+      filePreviewContent.innerHTML = '';
+    }
+
+    previewCloseBtn.addEventListener('click', closeFilePreview);
+
+  })();
+</script>
+
+</body>
+</html>
