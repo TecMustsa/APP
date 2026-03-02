@@ -1,539 +1,328 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Note App by M.D.</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magazzino Cantiere</title>
+
 <style>
-  /* Reset */
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0; 
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background: #121212;
-    color: #e0e0e0;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    user-select: none;
-  }
+*{box-sizing:border-box;}
 
-  h1 {
-    text-align: center;
-    margin: 1rem 0;
-    font-weight: 600;
-    color: #fafafa;
-  }
+body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+    background:linear-gradient(145deg,#0e0e11,#1a1a20);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:#eaeaea;
+}
 
-  .container {
-    max-width: 900px;
-    margin: auto;
-    padding: 1rem;
-    backdrop-filter: blur(12px);
-    background: rgba(30, 30, 30, 0.6);
-    border-radius: 16px;
-    box-shadow: 0 0 12px rgba(255,255,255,0.05);
-  }
+.glass{
+    width:95%;
+    max-width:550px;
+    max-height:95vh;
+    overflow:auto;
+    padding:30px;
+    border-radius:28px;
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(40px) saturate(120%);
+    border:1px solid rgba(255,255,255,0.08);
+    box-shadow:
+        0 25px 60px rgba(0,0,0,0.8),
+        inset 0 0 40px rgba(255,255,255,0.03);
+}
 
-  label {
-    display: block;
-    margin-top: 1rem;
-    font-weight: 500;
-    color: #bbb;
-  }
+h2,h3{
+    text-align:center;
+    font-weight:500;
+    letter-spacing:1px;
+}
 
-  input[type="text"],
-  input[type="date"],
-  textarea {
-    width: 100%;
-    padding: 10px 14px;
-    margin-top: 6px;
-    border-radius: 12px;
-    border: none;
-    background: rgba(255,255,255,0.08);
-    color: #eee;
-    font-size: 1rem;
-    resize: vertical;
-    box-shadow: inset 0 0 6px rgba(255,255,255,0.1);
-  }
-  textarea {
-    min-height: 80px;
-  }
+input{
+    width:100%;
+    padding:15px;
+    margin-top:15px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.06);
+    color:#fff;
+    font-size:16px;
+    outline:none;
+}
 
-  button {
-    margin-top: 1.2rem;
-    padding: 12px 24px;
-    font-weight: 600;
-    font-size: 1rem;
-    border-radius: 16px;
-    border: none;
-    cursor: pointer;
-    background: linear-gradient(145deg, #333, #222);
-    color: #ddd;
-    box-shadow: 2px 2px 6px #111, -2px -2px 6px #444;
-    transition: background 0.3s ease;
-    user-select: none;
-  }
-  button:hover {
-    background: linear-gradient(145deg, #555, #333);
-  }
-  button:active {
-    box-shadow: inset 2px 2px 6px #111, inset -2px -2px 6px #444;
-  }
+input::placeholder{
+    color:#888;
+}
 
-  #search-input {
-    margin-top: 1rem;
-    padding: 10px 14px;
-    width: 100%;
-    border-radius: 12px;
-    border: none;
-    background: rgba(255,255,255,0.06);
-    color: #eee;
-    font-size: 1rem;
-    box-shadow: inset 0 0 6px rgba(255,255,255,0.1);
-  }
+button{
+    width:100%;
+    padding:14px;
+    margin-top:15px;
+    border-radius:18px;
+    font-size:15px;
+    cursor:pointer;
+    border:1px solid rgba(255,255,255,0.15);
+    background:rgba(255,255,255,0.08);
+    color:#fff;
+    transition:0.2s ease;
+}
 
-  ul.notes-list {
-    margin-top: 1.5rem;
-    list-style: none;
-    padding: 0;
-    max-height: 350px;
-    overflow-y: auto;
-    border-radius: 16px;
-    background: rgba(40,40,40,0.5);
-    box-shadow: inset 0 0 10px rgba(255,255,255,0.05);
-  }
-  ul.notes-list li {
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    display: flex;
-    flex-direction: column;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
-  ul.notes-list li:hover {
-    background: rgba(255,255,255,0.1);
-  }
-  ul.notes-list li:last-child {
-    border-bottom: none;
-  }
-  ul.notes-list .note-title {
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: #f1f1f1;
-    margin-bottom: 4px;
-  }
-  ul.notes-list .note-date {
-    font-size: 0.8rem;
-    color: #999;
-  }
+button:hover{
+    background:rgba(255,255,255,0.18);
+}
 
-  /* Popup overlay */
-  .popup-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(20, 20, 20, 0.85);
-    backdrop-filter: blur(18px);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    padding: 1rem;
-  }
-  .popup-overlay.active {
-    display: flex;
-  }
+.btn-primary{
+    background:rgba(255,255,255,0.15);
+    font-weight:600;
+}
 
-  /* Popup content */
-  .popup-content {
-    position: relative;
-    max-width: 90vw;
-    max-height: 90vh;
-    background: rgba(30, 30, 30, 0.9);
-    border-radius: 20px;
-    box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
+.btn-secondary{
+    background:rgba(255,255,255,0.07);
+}
 
-  /* Scrollable content */
-  .popup-scrollable {
-    overflow-y: auto;
-    padding: 1rem 1.5rem;
-    color: #eee;
-    flex-grow: 1;
-  }
+.btn-danger{
+    background:rgba(90,90,90,0.2);
+    border:1px solid rgba(255,255,255,0.25);
+}
 
-  /* INDIETRO button */
-  #popup-back-btn {
-    background: #222;
-    border-radius: 0 0 20px 20px;
-    font-weight: 700;
-    font-size: 1rem;
-    padding: 14px 20px;
-    color: #eee;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
-    cursor: pointer;
-    user-select: none;
-  }
-  #popup-back-btn:hover {
-    background: #333;
-  }
-  #popup-back-btn:active {
-    background: #111;
-  }
+.lista-container{
+    margin-top:25px;
+    padding:15px;
+    border-radius:20px;
+    background:rgba(0,0,0,0.25);
+    border:1px solid rgba(255,255,255,0.08);
+}
 
-  /* File display */
-  #file-viewer img,
-  #file-viewer iframe {
-    max-width: 100%;
-    max-height: 70vh;
-    border-radius: 12px;
-    box-shadow: 0 0 12px rgba(255,255,255,0.2);
-  }
+.lista-title{
+    font-size:14px;
+    letter-spacing:1px;
+    opacity:0.7;
+    margin-bottom:10px;
+}
+
+.materiale{
+    padding:14px;
+    border-radius:16px;
+    margin-bottom:10px;
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.08);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.codice{
+    font-weight:500;
+}
+
+.qta{
+    font-size:14px;
+    opacity:0.8;
+}
+
+.azioni button{
+    width:auto;
+    padding:6px 10px;
+    margin-left:6px;
+    font-size:13px;
+    border-radius:12px;
+}
+
+.fileInput{display:none;}
 </style>
 </head>
+
 <body>
 
-<h1>Note App by M.D.</h1>
-<div class="container">
+<div class="glass">
+    <h2>Magazzino Cantiere</h2>
 
-  <label for="note-title">Titolo</label>
-  <input type="text" id="note-title" placeholder="Inserisci titolo nota..." />
+    <div id="step1">
+        <input type="text" id="cantiereInput" placeholder="RIFERIMENTO CANTIERE">
+        <button class="btn-primary" onclick="impostaCantiere()">Continua</button>
+    </div>
 
-  <label for="note-text">Descrizione</label>
-  <textarea id="note-text" placeholder="Inserisci testo nota..."></textarea>
+    <div id="step2" style="display:none;">
+        <h3 id="titolo"></h3>
 
-  <label for="note-date">Data (opzionale)</label>
-  <input type="date" id="note-date" />
+        <input type="text" id="codiceInput" placeholder="CODICE materiale">
+        <button class="btn-primary" onclick="aggiungiNuovo()">Aggiungi Nuovo</button>
 
-  <label for="note-files">Allega file (PDF, PNG, JPG/JPEG) - opzionale</label>
-  <input type="file" id="note-files" multiple accept=".pdf,image/png,image/jpeg" />
+        <div class="lista-container">
+            <div class="lista-title">LISTA MATERIALI</div>
+            <div id="lista"></div>
+        </div>
 
-  <button id="add-note-btn">AGGIUNGI NOTA</button>
-
-  <input type="text" id="search-input" placeholder="Cerca note per titolo..." />
-
-  <ul class="notes-list" id="notes-list"></ul>
-
-  <div style="margin-top:1rem; display:flex; gap: 10px;">
-    <button id="export-json-btn">Esporta JSON</button>
-    <button id="import-json-btn">Importa JSON</button>
-  </div>
-
-</div>
-
-<!-- Popup per visualizzare file -->
-<div class="popup-overlay" id="popup-overlay" aria-hidden="true">
-  <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="popup-title">
-    <div class="popup-scrollable" id="file-viewer"></div>
-    <button id="popup-back-btn">INDIETRO</button>
-  </div>
+        <button class="btn-secondary" onclick="esporta()">Esporta Lista</button>
+        <button class="btn-secondary" onclick="document.getElementById('fileImport').click()">Importa Lista</button>
+        <input type="file" id="fileImport" class="fileInput" accept=".txt" onchange="importa(event)">
+        <button class="btn-danger" onclick="eliminaCantiere()">Elimina Cantiere</button>
+    </div>
 </div>
 
 <script>
-  // Dati note: titolo, testo, data (stringa o null), files [{name,type,dataurl}]
-  let notes = JSON.parse(localStorage.getItem('notes-md') || '[]');
 
-  const titleInput = document.getElementById('note-title');
-  const textInput = document.getElementById('note-text');
-  const dateInput = document.getElementById('note-date');
-  const filesInput = document.getElementById('note-files');
-  const addNoteBtn = document.getElementById('add-note-btn');
-  const notesList = document.getElementById('notes-list');
-  const searchInput = document.getElementById('search-input');
+let riferimento="";
+let materiali={};
 
-  const popupOverlay = document.getElementById('popup-overlay');
-  const fileViewer = document.getElementById('file-viewer');
-  const popupBackBtn = document.getElementById('popup-back-btn');
-
-  // Salva note su localStorage
-  function saveNotes() {
-    localStorage.setItem('notes-md', JSON.stringify(notes));
-  }
-
-  // Render lista note filtrata per ricerca
-  function renderNotes(filter = '') {
-    notesList.innerHTML = '';
-    let filtered = notes.filter(n => n.title.toLowerCase().includes(filter.toLowerCase()));
-    if(filtered.length === 0) {
-      notesList.innerHTML = '<li style="text-align:center; padding:1rem; color:#888;">Nessuna nota trovata.</li>';
-      return;
+window.onload=function(){
+    if(localStorage.getItem("riferimento")){
+        riferimento=localStorage.getItem("riferimento");
+        materiali=JSON.parse(localStorage.getItem("materiali"))||{};
+        mostra();
     }
-    filtered.forEach((note, i) => {
-      const li = document.createElement('li');
-      li.setAttribute('tabindex', 0);
-      li.innerHTML = `
-        <div class="note-title">${note.title || '(Senza titolo)'}</div>
-        <div class="note-date">${note.date ? new Date(note.date).toLocaleDateString() : ''}</div>
-      `;
-      li.addEventListener('click', () => {
-        openNoteDetails(i);
-      });
-      li.addEventListener('keypress', e => {
-        if(e.key === 'Enter' || e.key === ' ') openNoteDetails(i);
-      });
-      notesList.appendChild(li);
-    });
-  }
+};
 
-  // Apri dettaglio nota per modifica / visualizzazione
-  function openNoteDetails(index) {
-    const note = notes[index];
-    titleInput.value = note.title || '';
-    textInput.value = note.text || '';
-    dateInput.value = note.date || '';
-    // Non ripopoliamo files input per sicurezza browser, ma in alternativa potremmo mostrare info file altrove
-    filesInput.value = '';
+function impostaCantiere(){
+    riferimento=document.getElementById("cantiereInput").value.trim();
+    if(!riferimento)return;
+    localStorage.setItem("riferimento",riferimento);
+    materiali={};
+    salva();
+    mostra();
+}
 
-    // Conserviamo l'indice modificabile
-    addNoteBtn.textContent = 'SALVA MODIFICA';
-    addNoteBtn.dataset.editIndex = index;
+function mostra(){
+    document.getElementById("step1").style.display="none";
+    document.getElementById("step2").style.display="block";
+    document.getElementById("titolo").innerText="Cantiere: "+riferimento;
+    aggiorna();
+}
 
-    // Scroll to top
-    window.scrollTo({top: 0, behavior: 'smooth'});
-  }
-
-  // Aggiungi o salva nota
-  addNoteBtn.addEventListener('click', () => {
-    const title = titleInput.value.trim();
-    const text = textInput.value.trim();
-    const date = dateInput.value ? dateInput.value : null;
-
-    if (!text && !title) {
-      alert('Inserisci almeno un titolo o una descrizione.');
-      return;
+/* SOLO NUMERI */
+function chiediQuantita(msg){
+    let q=prompt(msg);
+    if(q===null)return null;
+    if(!/^\d+$/.test(q)){
+        alert("Inserisci solo numeri.");
+        return chiediQuantita(msg);
     }
+    return parseInt(q);
+}
 
-    // Funzione per leggere file e restituire promise con dataURL
-    function readFiles(files) {
-      return Promise.all(Array.from(files).map(file => {
-        return new Promise(resolve => {
-          const reader = new FileReader();
-          reader.onload = () => {
-            resolve({ name: file.name, type: file.type, dataUrl: reader.result });
-          };
-          reader.readAsDataURL(file);
-        });
-      }));
-    }
-
-    // Se stiamo modificando
-    if (addNoteBtn.dataset.editIndex !== undefined) {
-      const idx = Number(addNoteBtn.dataset.editIndex);
-      // Leggi files se presenti
-      if (filesInput.files.length > 0) {
-        readFiles(filesInput.files).then(fileData => {
-          notes[idx] = { title, text, date, files: fileData };
-          saveNotes();
-          resetForm();
-          renderNotes(searchInput.value);
-        });
-      } else {
-        // Mantieni i files esistenti se non si allegano nuovi
-        notes[idx] = { 
-          title, 
-          text, 
-          date, 
-          files: notes[idx].files || [] 
-        };
-        saveNotes();
-        resetForm();
-        renderNotes(searchInput.value);
-      }
-    } else {
-      // Nuova nota
-      if (filesInput.files.length > 0) {
-        readFiles(filesInput.files).then(fileData => {
-          notes.push({ title, text, date, files: fileData });
-          saveNotes();
-          resetForm();
-          renderNotes(searchInput.value);
-        });
-      } else {
-        notes.push({ title, text, date, files: [] });
-        saveNotes();
-        resetForm();
-        renderNotes(searchInput.value);
-      }
-    }
-  });
-
-  // Reset form e stato bottone aggiungi
-  function resetForm() {
-    titleInput.value = '';
-    textInput.value = '';
-    dateInput.value = '';
-    filesInput.value = '';
-    addNoteBtn.textContent = 'AGGIUNGI NOTA';
-    delete addNoteBtn.dataset.editIndex;
-  }
-
-  // Ricerca note al volo
-  searchInput.addEventListener('input', () => {
-    renderNotes(searchInput.value);
-  });
-
-  // Apri popup con file selezionato
-  function openFilePopup(file) {
-    fileViewer.innerHTML = ''; // reset
-
-    if (file.type === 'application/pdf') {
-      const iframe = document.createElement('iframe');
-      iframe.src = file.dataUrl;
-      iframe.setAttribute('aria-label', file.name);
-      iframe.style.border = 'none';
-      fileViewer.appendChild(iframe);
-    } else if (file.type.startsWith('image/')) {
-      const img = document.createElement('img');
-      img.src = file.dataUrl;
-      img.alt = file.name;
-      fileViewer.appendChild(img);
-    } else {
-      fileViewer.textContent = 'Anteprima non disponibile per questo tipo di file.';
-    }
-
-    popupOverlay.classList.add('active');
-    popupOverlay.setAttribute('aria-hidden', 'false');
-  }
-
-  // Chiudi popup
-  function closePopup() {
-    popupOverlay.classList.remove('active');
-    popupOverlay.setAttribute('aria-hidden', 'true');
-    fileViewer.innerHTML = '';
-  }
-
-  // Click su overlay o indietro per chiudere popup
-  popupBackBtn.addEventListener('click', closePopup);
-
-  // Evita chiusura se clic su contenuto popup
-  document.querySelector('.popup-content').addEventListener('click', e => e.stopPropagation());
-  popupOverlay.addEventListener('click', closePopup);
-
-  // Quando si clicca su una nota, se ha file, mostra lista file da cliccare
-  notesList.addEventListener('click', e => {
-    // Si gestisce apertura nota già con li click
-  });
-
-  // Render note con elenco file cliccabili
-  function renderNotes(filter = '') {
-    notesList.innerHTML = '';
-    let filtered = notes.filter(n => n.title.toLowerCase().includes(filter.toLowerCase()));
-    if(filtered.length === 0) {
-      notesList.innerHTML = '<li style="text-align:center; padding:1rem; color:#888;">Nessuna nota trovata.</li>';
-      return;
-    }
-    filtered.forEach((note, i) => {
-      const li = document.createElement('li');
-      li.setAttribute('tabindex', 0);
-
-      let html = `
-        <div class="note-title">${note.title || '(Senza titolo)'}</div>
-        <div class="note-date">${note.date ? new Date(note.date).toLocaleDateString() : ''}</div>
-      `;
-
-      if(note.files && note.files.length > 0) {
-        html += `<div style="margin-top:8px; font-size:0.9rem; color:#aaa;">Allegati: </div>`;
-        html += `<ul style="padding-left:20px; margin-top:4px; max-height: 100px; overflow-y:auto;">`;
-        note.files.forEach((f, idx) => {
-          html += `<li style="cursor:pointer; color:#78a6f7; text-decoration:underline;" data-note="${i}" data-file="${idx}" tabindex="0">${f.name}</li>`;
-        });
-        html += `</ul>`;
-      }
-
-      li.innerHTML = html;
-
-      // Click per aprire la nota (titolo e data)
-      li.querySelector('.note-title').addEventListener('click', () => openNoteDetails(i));
-      li.querySelector('.note-date').addEventListener('click', () => openNoteDetails(i));
-
-      // Eventi click su file allegati
-      if(note.files && note.files.length > 0) {
-        const fileItems = li.querySelectorAll('ul li');
-        fileItems.forEach(fi => {
-          fi.addEventListener('click', ev => {
-            ev.stopPropagation();
-            const noteIdx = Number(fi.getAttribute('data-note'));
-            const fileIdx = Number(fi.getAttribute('data-file'));
-            openFilePopup(notes[noteIdx].files[fileIdx]);
-          });
-          fi.addEventListener('keypress', e => {
-            if(e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              const noteIdx = Number(fi.getAttribute('data-note'));
-              const fileIdx = Number(fi.getAttribute('data-file'));
-              openFilePopup(notes[noteIdx].files[fileIdx]);
-            }
-          });
-        });
-      }
-
-      // Click sull'intera riga per modificare nota
-      li.addEventListener('click', () => openNoteDetails(i));
-      li.addEventListener('keypress', e => {
-        if(e.key === 'Enter' || e.key === ' ') openNoteDetails(i);
-      });
-
-      notesList.appendChild(li);
-    });
-  }
-
-  // Esporta note in JSON
-  document.getElementById('export-json-btn').addEventListener('click', () => {
-    const dataStr = JSON.stringify(notes, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'notes-md-export.json';
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  // Importa note da JSON
-  document.getElementById('import-json-btn').addEventListener('click', () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'application/json';
-    input.onchange = e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = e => {
-        try {
-          const importedNotes = JSON.parse(e.target.result);
-          if (Array.isArray(importedNotes)) {
-            notes = importedNotes;
-            saveNotes();
-            renderNotes(searchInput.value);
-            alert('Note importate con successo!');
-          } else {
-            alert('File JSON non valido');
-          }
-        } catch {
-          alert('Errore nel parsing del file JSON');
+document.getElementById("codiceInput").addEventListener("blur",function(){
+    let codice=this.value.trim();
+    if(materiali[codice]){
+        let q=chiediQuantita("Codice già presente. Quantità da aggiungere:");
+        if(q!==null){
+            materiali[codice]+=q;
+            salva();
+            aggiorna();
+            this.value="";
         }
-      };
-      reader.readAsText(file);
-    };
-    input.click();
-  });
-
-  // Inizializza lista note
-  renderNotes();
-
-  // Chiudi popup con ESC
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && popupOverlay.classList.contains('active')) {
-      closePopup();
     }
-  });
+});
+
+function aggiungiNuovo(){
+    let codice=document.getElementById("codiceInput").value.trim();
+    if(!codice)return;
+
+    if(materiali[codice]){
+        alert("Codice già presente.");
+        return;
+    }
+
+    let q=chiediQuantita("Inserisci quantità:");
+    if(q!==null){
+        materiali[codice]=q;
+        salva();
+        aggiorna();
+        document.getElementById("codiceInput").value="";
+    }
+}
+
+function aggiorna(){
+    let lista=document.getElementById("lista");
+    lista.innerHTML="";
+
+    for(let codice in materiali){
+        let div=document.createElement("div");
+        div.className="materiale";
+        div.innerHTML=`
+            <div>
+                <div class="codice">${codice}</div>
+                <div class="qta">Quantità: ${materiali[codice]}</div>
+            </div>
+            <div class="azioni">
+                <button onclick="modifica('${codice}',1)">+</button>
+                <button onclick="modifica('${codice}',-1)">-</button>
+                <button onclick="elimina('${codice}')">X</button>
+            </div>
+        `;
+        lista.appendChild(div);
+    }
+}
+
+function modifica(codice,val){
+    materiali[codice]+=val;
+    if(materiali[codice]<=0)delete materiali[codice];
+    salva();
+    aggiorna();
+}
+
+function elimina(codice){
+    delete materiali[codice];
+    salva();
+    aggiorna();
+}
+
+function salva(){
+    localStorage.setItem("materiali",JSON.stringify(materiali));
+}
+
+function esporta(){
+    let testo="RIFERIMENTO CANTIERE: "+riferimento+"\n\n";
+    for(let codice in materiali){
+        testo+=codice+" - Quantità: "+materiali[codice]+"\n";
+    }
+
+    let blob=new Blob([testo],{type:"text/plain"});
+    let link=document.createElement("a");
+    link.href=URL.createObjectURL(blob);
+    link.download=riferimento+".txt";
+    link.click();
+}
+
+function importa(event){
+    let file=event.target.files[0];
+    if(!file)return;
+
+    let reader=new FileReader();
+    reader.onload=function(e){
+        let righe=e.target.result.split("\n");
+        materiali={};
+
+        righe.forEach(r=>{
+            if(r.includes(" - Quantità: ")){
+                let parts=r.split(" - Quantità: ");
+                materiali[parts[0]]=parseInt(parts[1]);
+            }
+        });
+
+        salva();
+        aggiorna();
+    };
+    reader.readAsText(file);
+}
+
+/* QUI È LA MODIFICA IMPORTANTE */
+function eliminaCantiere(){
+    if(confirm("Eliminare completamente il cantiere?")){
+        riferimento="";
+        materiali={};
+        localStorage.removeItem("riferimento");
+        localStorage.removeItem("materiali");
+
+        document.getElementById("step2").style.display="none";
+        document.getElementById("step1").style.display="block";
+        document.getElementById("cantiereInput").value="";
+        document.getElementById("lista").innerHTML="";
+    }
+}
+
 </script>
 
 </body>
 </html>
-
